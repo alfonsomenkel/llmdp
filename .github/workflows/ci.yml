@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  ci:
+  rust:
     runs-on: ubuntu-latest
 
     steps:
