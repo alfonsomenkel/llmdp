@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use serde_json::json;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{self, Command};
 
 #[derive(Parser)]
@@ -84,10 +84,28 @@ fn main() {
             });
 
             let facts_text = facts.to_string();
-            println!("{facts_text}");
+            let facts_path: PathBuf = match write_facts {
+                Some(path) => PathBuf::from(path),
+                None => Path::new(&repo).join(".llmdp_facts.json"),
+            };
 
-            if let Some(path) = write_facts {
-                let _ = fs::write(path, &facts_text);
+            if fs::write(&facts_path, &facts_text).is_err() {
+                process::exit(3);
+            }
+
+            let llmc_status = Command::new("llmc")
+                .arg("--contract")
+                .arg(&contract)
+                .arg("--output")
+                .arg(&facts_path)
+                .status();
+
+            match llmc_status {
+                Ok(status) => match status.code() {
+                    Some(code) => process::exit(code),
+                    None => process::exit(3),
+                },
+                Err(_) => process::exit(3),
             }
         }
     }
