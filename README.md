@@ -1,7 +1,7 @@
 # llmdp
 [![CI](https://github.com/alfonsomenkel/llmdp/actions/workflows/ci.yml/badge.svg)](https://github.com/alfonsomenkel/llmdp/actions/workflows/ci.yml)
 
-LLMDP v0.1 is a deterministic Rust quality gate.
+LLMDP v0.2 is a deterministic Rust quality gate.
 
 It always requires a contract and does not implement validation logic itself.
 It executes:
@@ -14,8 +14,11 @@ It generates structured facts, invokes `llmc`, and exits with `llmc`'s exit code
 
 ## Usage
 ```sh
-llmdp run --repo <path> --contract <path> [--write-facts <path>]
+llmdp run --repo <path> --language rust --contract <path> [--write-facts <path>]
 ```
+
+`--language` is required. Currently supported values:
+- `rust`
 
 ## Behavior
 - Facts are written to a file.

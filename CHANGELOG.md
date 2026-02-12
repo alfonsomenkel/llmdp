@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 
 ---
 
+## [0.2.0] - Adapter + Language Flag
+
+### Added
+- Required `--language <LANG>` argument for `llmdp run`
+- Language adapter abstraction (`LanguageAdapter` trait)
+- Rust-specific adapter implementation (`RustAdapter`)
+
+### Changed
+- `run` command now selects facts generation by language adapter
+- Unsupported languages exit with code `3`
+
 ## [0.1.0] - Initial Release
 
 ### Added
