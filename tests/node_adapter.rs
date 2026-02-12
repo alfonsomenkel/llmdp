@@ -68,7 +68,12 @@ fn write_contract(path: &Path, rules: Value) {
     fs::write(path, serde_json::to_string_pretty(&contract).unwrap()).unwrap();
 }
 
-fn run_llmdp(repo_path: &Path, contract_path: &Path, facts_path: &Path, path_env: &OsString) -> i32 {
+fn run_llmdp(
+    repo_path: &Path,
+    contract_path: &Path,
+    facts_path: &Path,
+    path_env: &OsString,
+) -> i32 {
     let status = Command::new(env!("CARGO_BIN_EXE_llmdp"))
         .arg("run")
         .arg("--repo")
