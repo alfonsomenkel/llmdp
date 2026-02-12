@@ -1,4 +1,5 @@
 # llmdp
+[![CI](https://github.com/alfonsomenkel/llmdp/actions/workflows/ci.yml/badge.svg)](https://github.com/alfonsomenkel/llmdp/actions/workflows/ci.yml)
 LLMDP v0.1 is a deterministic Rust quality gate.
 
 It always requires a contract and does not implement validation logic itself.
