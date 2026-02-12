@@ -1,0 +1,9 @@
+{
+  "contract": "fmt_gate",
+  "version": 1,
+  "inputs": ["repo"],
+  "output_type": "object",
+  "rules": [
+    { "rule": "allowed_values", "field": "fmt_ok", "values": [true] }
+  ]
+}
