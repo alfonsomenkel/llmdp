@@ -54,7 +54,7 @@ impl LanguageAdapter for NodeAdapter {
         ];
 
         for (script, fact) in checks {
-            if scripts.map_or(false, |entries| entries.contains_key(script)) {
+            if scripts.is_some_and(|entries| entries.contains_key(script)) {
                 facts.insert(fact.to_string(), Value::Bool(run_npm_script(repo, script)));
             }
         }
