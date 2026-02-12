@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 ---
 
+## [0.3.0] - 2026-02-12
+
+### Added
+- Node language adapter
+- Node integration tests
+- Multi-language fact generation support
+
+### Changed
+- `--language` flag now supports `rust` and `node`
+
 ## [0.2.0] - Adapter + Language Flag
 
 ### Added

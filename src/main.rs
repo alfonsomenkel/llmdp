@@ -1,6 +1,6 @@
 mod adapters;
 
-use adapters::{LanguageAdapter, RustAdapter};
+use adapters::{LanguageAdapter, NodeAdapter, RustAdapter};
 use clap::{Parser, Subcommand};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -50,6 +50,10 @@ fn main() {
             let facts = match language.as_str() {
                 "rust" => {
                     let adapter = RustAdapter;
+                    adapter.run(&repo)
+                }
+                "node" => {
+                    let adapter = NodeAdapter;
                     adapter.run(&repo)
                 }
                 _ => {
