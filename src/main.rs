@@ -60,9 +60,20 @@ fn main() {
                 Err(_) => false,
             };
 
+            let tests_status = Command::new("cargo")
+                .arg("test")
+                .current_dir(&repo)
+                .status();
+
+            let tests_ok = match tests_status {
+                Ok(status) => status.code() == Some(0),
+                Err(_) => false,
+            };
+
             let facts = json!({
                 "fmt_ok": fmt_ok,
-                "clippy_ok": clippy_ok
+                "clippy_ok": clippy_ok,
+                "tests_ok": tests_ok
             });
 
             println!("{facts}");
