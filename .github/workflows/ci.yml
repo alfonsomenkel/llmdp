@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  ci:
+  rust:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout llmc
         uses: actions/checkout@v4
         with:
-          repository: alfonsomenkel/llm-contracts
+          repository: alfonsomenkel/llmc
           path: llmc
 
       - name: Build llmc
