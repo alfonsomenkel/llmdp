@@ -1,9 +1,10 @@
 {
-  "contract": "fmt_gate",
-  "version": 1,
+  "contract": "rust_quality_gate",
+  "version": 2,
   "inputs": ["repo"],
   "output_type": "object",
   "rules": [
-    { "rule": "allowed_values", "field": "fmt_ok", "values": [true] }
+    { "rule": "allowed_values", "field": "fmt_ok", "values": [true] },
+    { "rule": "allowed_values", "field": "clippy_ok", "values": [true] }
   ]
 }

@@ -47,8 +47,22 @@ fn main() {
                 Err(_) => false,
             };
 
+            let clippy_status = Command::new("cargo")
+                .arg("clippy")
+                .arg("--")
+                .arg("-D")
+                .arg("warnings")
+                .current_dir(&repo)
+                .status();
+
+            let clippy_ok = match clippy_status {
+                Ok(status) => status.code() == Some(0),
+                Err(_) => false,
+            };
+
             let facts = json!({
-                "fmt_ok": fmt_ok
+                "fmt_ok": fmt_ok,
+                "clippy_ok": clippy_ok
             });
 
             println!("{facts}");
