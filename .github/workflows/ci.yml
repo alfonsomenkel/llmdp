@@ -21,7 +21,7 @@ jobs:
       - name: Checkout llmc
         uses: actions/checkout@v4
         with:
-          repository: alfonsomenkel/llmc
+          repository: alfonsomenkel/llm_contracts
           path: llmc
 
       - name: Build llmc
