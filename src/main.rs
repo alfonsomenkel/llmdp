@@ -1,5 +1,7 @@
+mod adapters;
+
+use adapters::{LanguageAdapter, RustAdapter};
 use clap::{Parser, Subcommand};
-use serde_json::json;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{self, Command};
@@ -17,6 +19,8 @@ enum Commands {
         #[arg(long, required = true)]
         repo: String,
         #[arg(long, required = true)]
+        language: String,
+        #[arg(long, required = true)]
         contract: String,
         #[arg(long)]
         write_facts: Option<String>,
@@ -29,6 +33,7 @@ fn main() {
     match cli.command {
         Commands::Run {
             repo,
+            language,
             contract,
             write_facts,
         } => {
@@ -42,46 +47,16 @@ fn main() {
                 process::exit(3);
             }
 
-            let fmt_status = Command::new("cargo")
-                .arg("fmt")
-                .arg("--")
-                .arg("--check")
-                .current_dir(&repo)
-                .status();
-
-            let fmt_ok = match fmt_status {
-                Ok(status) => status.code() == Some(0),
-                Err(_) => false,
+            let facts = match language.as_str() {
+                "rust" => {
+                    let adapter = RustAdapter;
+                    adapter.run(&repo)
+                }
+                _ => {
+                    eprintln!("Error: unsupported language: {language}");
+                    process::exit(3);
+                }
             };
-
-            let clippy_status = Command::new("cargo")
-                .arg("clippy")
-                .arg("--")
-                .arg("-D")
-                .arg("warnings")
-                .current_dir(&repo)
-                .status();
-
-            let clippy_ok = match clippy_status {
-                Ok(status) => status.code() == Some(0),
-                Err(_) => false,
-            };
-
-            let tests_status = Command::new("cargo")
-                .arg("test")
-                .current_dir(&repo)
-                .status();
-
-            let tests_ok = match tests_status {
-                Ok(status) => status.code() == Some(0),
-                Err(_) => false,
-            };
-
-            let facts = json!({
-                "fmt_ok": fmt_ok,
-                "clippy_ok": clippy_ok,
-                "tests_ok": tests_ok
-            });
 
             let facts_text = facts.to_string();
             let facts_path: PathBuf = match write_facts {
