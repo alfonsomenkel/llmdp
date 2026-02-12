@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use serde_json::json;
+use std::fs;
 use std::path::Path;
 use std::process::{self, Command};
 
@@ -17,6 +18,8 @@ enum Commands {
         repo: String,
         #[arg(long, required = true)]
         contract: String,
+        #[arg(long)]
+        write_facts: Option<String>,
     },
 }
 
@@ -24,7 +27,11 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Run { repo, contract } => {
+        Commands::Run {
+            repo,
+            contract,
+            write_facts,
+        } => {
             if !Path::new(&repo).exists() {
                 eprintln!("Error: repo path does not exist: {repo}");
                 process::exit(3);
@@ -76,7 +83,12 @@ fn main() {
                 "tests_ok": tests_ok
             });
 
-            println!("{facts}");
+            let facts_text = facts.to_string();
+            println!("{facts_text}");
+
+            if let Some(path) = write_facts {
+                let _ = fs::write(path, &facts_text);
+            }
         }
     }
 }
