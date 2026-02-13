@@ -12,6 +12,13 @@ It executes:
 
 It generates structured facts, invokes `llmc`, and exits with `llmc`'s exit code.
 
+## Adapter Philosophy
+- LLMDP is a strict, deterministic quality gate.
+- LLMDP is not a generic language signal collector.
+- Adapters should emit reproducible quality facts from deterministic checks.
+- For non-applicable checks (for example, missing Node scripts), LLMDP omits the field instead of emitting `false`.
+- Contract policy and pass/fail interpretation remain in `llmc`; LLMDP only produces facts.
+
 ## Supported Languages
 - `rust`
 - `node`
