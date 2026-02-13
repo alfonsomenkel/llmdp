@@ -47,7 +47,7 @@ fn main() {
                 process::exit(3);
             }
 
-            let facts = match language.as_str() {
+            let facts_result = match language.as_str() {
                 "rust" => {
                     let adapter = RustAdapter;
                     adapter.run(&repo)
@@ -62,6 +62,14 @@ fn main() {
                 }
             };
 
+            let facts = match facts_result {
+                Ok(facts) => facts,
+                Err(err) => {
+                    eprintln!("Error: adapter execution failed: {err}");
+                    process::exit(3);
+                }
+            };
+
             let facts_text = facts.to_string();
             let facts_path: PathBuf = match write_facts {
                 Some(path) => PathBuf::from(path),
@@ -69,6 +77,10 @@ fn main() {
             };
 
             if fs::write(&facts_path, &facts_text).is_err() {
+                eprintln!(
+                    "Error: failed to write facts file: {}",
+                    facts_path.display()
+                );
                 process::exit(3);
             }
 
@@ -82,9 +94,15 @@ fn main() {
             match llmc_status {
                 Ok(status) => match status.code() {
                     Some(code) => process::exit(code),
-                    None => process::exit(3),
+                    None => {
+                        eprintln!("Error: llmc exited without a status code");
+                        process::exit(3);
+                    }
                 },
-                Err(_) => process::exit(3),
+                Err(err) => {
+                    eprintln!("Error: failed to invoke llmc: {err}");
+                    process::exit(3);
+                }
             }
         }
     }

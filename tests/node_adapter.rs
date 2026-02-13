@@ -12,6 +12,10 @@ fn path_with_fake_bin(bin_dir: &Path) -> OsString {
     std::env::join_paths(paths).unwrap()
 }
 
+fn path_with_only_bin(bin_dir: &Path) -> OsString {
+    std::env::join_paths([bin_dir]).unwrap()
+}
+
 fn write_fake_npm(bin_dir: &Path) {
     if cfg!(windows) {
         let npm_cmd = bin_dir.join("npm.cmd");
@@ -54,6 +58,29 @@ exit 1
         )
         .unwrap();
         Command::new("chmod").arg("+x").arg(&npm).status().unwrap();
+    }
+}
+
+fn write_fake_llmc_success(bin_dir: &Path) {
+    if cfg!(windows) {
+        let llmc_cmd = bin_dir.join("llmc.cmd");
+        fs::write(
+            llmc_cmd,
+            r#"@echo off
+exit /b 0
+"#,
+        )
+        .unwrap();
+    } else {
+        let llmc = bin_dir.join("llmc");
+        fs::write(
+            &llmc,
+            r#"#!/bin/sh
+exit 0
+"#,
+        )
+        .unwrap();
+        Command::new("chmod").arg("+x").arg(&llmc).status().unwrap();
     }
 }
 
@@ -192,4 +219,36 @@ fn node_adapter_sets_lint_ok_false_when_lint_script_fails() {
     let code = run_llmdp(&repo_path, &contract_path, &facts_path, &path_env);
     assert_eq!(code, 0);
     assert_eq!(read_facts(&facts_path), json!({ "lint_ok": false }));
+}
+
+#[test]
+fn node_adapter_exits_with_operational_error_when_npm_is_missing() {
+    let temp_dir = tempdir().unwrap();
+    let repo_path = temp_dir.path().join("repo");
+    let bin_dir = temp_dir.path().join("bin");
+    fs::create_dir_all(&repo_path).unwrap();
+    fs::create_dir_all(&bin_dir).unwrap();
+    write_fake_llmc_success(&bin_dir);
+    let path_env = path_with_only_bin(&bin_dir);
+
+    fs::write(
+        repo_path.join("package.json"),
+        r#"{
+  "name": "sample-node",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "exit 0"
+  }
+}
+"#,
+    )
+    .unwrap();
+
+    let contract_path = temp_dir.path().join("contract_missing_npm.txt");
+    let facts_path = temp_dir.path().join("facts_missing_npm.json");
+    write_contract(&contract_path, json!([]));
+
+    let code = run_llmdp(&repo_path, &contract_path, &facts_path, &path_env);
+    assert_eq!(code, 3);
+    assert!(!facts_path.exists());
 }

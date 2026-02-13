@@ -4,44 +4,26 @@ use std::process::Command;
 
 pub struct RustAdapter;
 
+fn run_cargo_check(repo: &str, args: &[&str], check_name: &str) -> Result<bool, String> {
+    let status = Command::new("cargo")
+        .args(args)
+        .current_dir(repo)
+        .status()
+        .map_err(|err| format!("failed to run cargo {check_name}: {err}"))?;
+
+    Ok(status.code() == Some(0))
+}
+
 impl LanguageAdapter for RustAdapter {
-    fn run(&self, repo: &str) -> serde_json::Value {
-        let fmt_status = Command::new("cargo")
-            .arg("fmt")
-            .arg("--")
-            .arg("--check")
-            .current_dir(repo)
-            .status();
+    fn run(&self, repo: &str) -> Result<serde_json::Value, String> {
+        let fmt_ok = run_cargo_check(repo, &["fmt", "--", "--check"], "fmt -- --check")?;
+        let clippy_ok = run_cargo_check(repo, &["clippy", "--", "-D", "warnings"], "clippy")?;
+        let tests_ok = run_cargo_check(repo, &["test"], "test")?;
 
-        let fmt_ok = match fmt_status {
-            Ok(status) => status.code() == Some(0),
-            Err(_) => false,
-        };
-
-        let clippy_status = Command::new("cargo")
-            .arg("clippy")
-            .arg("--")
-            .arg("-D")
-            .arg("warnings")
-            .current_dir(repo)
-            .status();
-
-        let clippy_ok = match clippy_status {
-            Ok(status) => status.code() == Some(0),
-            Err(_) => false,
-        };
-
-        let tests_status = Command::new("cargo").arg("test").current_dir(repo).status();
-
-        let tests_ok = match tests_status {
-            Ok(status) => status.code() == Some(0),
-            Err(_) => false,
-        };
-
-        json!({
+        Ok(json!({
             "fmt_ok": fmt_ok,
             "clippy_ok": clippy_ok,
             "tests_ok": tests_ok
-        })
+        }))
     }
 }

@@ -63,11 +63,11 @@ Core trait:
 
 ```rust
 pub trait LanguageAdapter {
-    fn run(&self, repo: &str) -> serde_json::Value;
+    fn run(&self, repo: &str) -> Result<serde_json::Value, String>;
 }
 ```
 
-This keeps language-specific command execution separate from CLI orchestration.
+This keeps language-specific command execution separate from CLI orchestration while allowing adapters to surface operational errors.
 
 ### 3. Rust Adapter
 
@@ -78,7 +78,8 @@ Runs in target repo:
 - `cargo clippy -- -D warnings` -> `clippy_ok`
 - `cargo test` -> `tests_ok`
 
-Any command execution error maps to `false` for that fact.
+Non-zero exit status maps to `false` for that fact.
+Command execution failures (for example, `cargo` unavailable) are adapter errors and cause exit code `3`.
 
 ### 4. Node Adapter
 
@@ -94,6 +95,7 @@ Behavior:
 - If `package-lock.json` exists, runs `npm audit --audit-level=high` and emits `audit_ok`.
 
 This sparse-facts model is intentional: missing scripts produce omitted fields, not `false`.
+If a required Node check command cannot be executed (for example, `npm` unavailable for an existing script/audit check), adapter execution fails and `llmdp` exits with code `3`.
 
 ## Facts and Contracts Boundary
 
@@ -113,7 +115,16 @@ This enforces a clean separation:
 
 Exit code behavior:
 - `0`, `1`, etc.: forwarded from `llmc` verdict execution.
-- `3`: `llmdp` operational/runtime failure (bad inputs, unsupported language, write failure, `llmc` invocation failure, missing child exit status).
+- `3`: `llmdp` operational/runtime failure:
+  - bad inputs or unsupported language
+  - adapter execution failure (required tool missing/spawn failure)
+  - facts file write failure
+  - `llmc` invocation failure or missing child exit status
+
+Deterministic failure semantics:
+- Check command returns non-zero: emit fact `false`.
+- Check is not applicable by repository shape/configuration: omit fact key.
+- Check command cannot be executed: operational failure (`exit 3`), no contract evaluation.
 
 ## Test and CI Architecture
 

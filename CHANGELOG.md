@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 
 ---
 
+## [Unreleased]
+
+### Changed
+- Adapter execution failures now return operational exit code `3` instead of being collapsed into `false` facts.
+- Rust adapter now treats `cargo` invocation failures as operational failures.
+- Node adapter now treats `npm` invocation failures for required checks as operational failures.
+
+### Added
+- Documented deterministic failure semantics in `README.md` and `ARCHITECTURE.md`.
+- Integration tests for missing tool operational failures (`cargo`/`npm`) returning exit code `3`.
+
 ## [0.3.0] - 2026-02-12
 
 ### Added
