@@ -19,6 +19,26 @@ It generates structured facts, invokes `llmc`, and exits with `llmc`'s exit code
 - For non-applicable checks (for example, missing Node scripts), LLMDP omits the field instead of emitting `false`.
 - Contract policy and pass/fail interpretation remain in `llmc`; LLMDP only produces facts.
 
+## Adapter Interface
+The adapter contract is defined in `src/adapters/mod.rs`:
+
+```rust
+pub type AdapterFacts = serde_json::Map<String, serde_json::Value>;
+
+pub enum AdapterError {
+    Operational(String),
+}
+
+pub trait LanguageAdapter {
+    fn run(&self, repo: &std::path::Path) -> Result<AdapterFacts, AdapterError>;
+}
+```
+
+Semantics for all adapters:
+- Check command exits non-zero: emit that fact as `false`.
+- Check is not applicable: omit that fact key.
+- Required check command cannot execute: return `AdapterError::Operational` and exit `3`.
+
 ## Supported Languages
 - `rust`
 - `node`
