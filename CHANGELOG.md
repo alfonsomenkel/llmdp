@@ -7,6 +7,8 @@ All notable changes to this project are documented here.
 ## [Unreleased]
 
 ### Changed
+- Formalized adapter contract in code with typed `AdapterFacts`, typed `AdapterError`, and `LanguageAdapter::run(&Path, ...)`.
+- Main orchestration now serializes typed adapter facts and handles fact serialization failures as operational exit `3`.
 - Adapter execution failures now return operational exit code `3` instead of being collapsed into `false` facts.
 - Rust adapter now treats `cargo` invocation failures as operational failures.
 - Node adapter now treats `npm` invocation failures for required checks as operational failures.

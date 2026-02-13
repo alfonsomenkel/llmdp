@@ -62,12 +62,18 @@ File: `src/adapters/mod.rs`
 Core trait:
 
 ```rust
+pub type AdapterFacts = serde_json::Map<String, serde_json::Value>;
+
+pub enum AdapterError {
+    Operational(String),
+}
+
 pub trait LanguageAdapter {
-    fn run(&self, repo: &str) -> Result<serde_json::Value, String>;
+    fn run(&self, repo: &std::path::Path) -> Result<AdapterFacts, AdapterError>;
 }
 ```
 
-This keeps language-specific command execution separate from CLI orchestration while allowing adapters to surface operational errors.
+This keeps language-specific command execution separate from CLI orchestration while giving adapters a typed facts model and explicit operational error type.
 
 ### 3. Rust Adapter
 
@@ -124,7 +130,7 @@ Exit code behavior:
 Deterministic failure semantics:
 - Check command returns non-zero: emit fact `false`.
 - Check is not applicable by repository shape/configuration: omit fact key.
-- Check command cannot be executed: operational failure (`exit 3`), no contract evaluation.
+- Check command cannot be executed: return `AdapterError::Operational`, which results in operational failure (`exit 3`) and no contract evaluation.
 
 ## Test and CI Architecture
 

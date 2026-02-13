@@ -37,7 +37,9 @@ fn main() {
             contract,
             write_facts,
         } => {
-            if !Path::new(&repo).exists() {
+            let repo_path = Path::new(&repo);
+
+            if !repo_path.exists() {
                 eprintln!("Error: repo path does not exist: {repo}");
                 process::exit(3);
             }
@@ -50,11 +52,11 @@ fn main() {
             let facts_result = match language.as_str() {
                 "rust" => {
                     let adapter = RustAdapter;
-                    adapter.run(&repo)
+                    adapter.run(repo_path)
                 }
                 "node" => {
                     let adapter = NodeAdapter;
-                    adapter.run(&repo)
+                    adapter.run(repo_path)
                 }
                 _ => {
                     eprintln!("Error: unsupported language: {language}");
@@ -70,10 +72,17 @@ fn main() {
                 }
             };
 
-            let facts_text = facts.to_string();
+            let facts_text = match serde_json::to_string(&facts) {
+                Ok(text) => text,
+                Err(err) => {
+                    eprintln!("Error: failed to serialize facts: {err}");
+                    process::exit(3);
+                }
+            };
+
             let facts_path: PathBuf = match write_facts {
                 Some(path) => PathBuf::from(path),
-                None => Path::new(&repo).join(".llmdp_facts.json"),
+                None => repo_path.join(".llmdp_facts.json"),
             };
 
             if fs::write(&facts_path, &facts_text).is_err() {
