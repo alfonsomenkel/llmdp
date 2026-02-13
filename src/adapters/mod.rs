@@ -4,7 +4,7 @@ mod node;
 mod rust;
 
 pub trait LanguageAdapter {
-    fn run(&self, repo: &str) -> Value;
+    fn run(&self, repo: &str) -> Result<Value, String>;
 }
 
 pub use node::NodeAdapter;

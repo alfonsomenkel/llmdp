@@ -39,11 +39,20 @@ For `node`, if `package-lock.json` exists, LLMDP also runs `npm audit --audit-le
 
 ## Behavior
 - LLMDP generates structured JSON facts.
-- Facts are printed to stdout.
 - If `--write-facts` is provided, that path is used.
-- Otherwise, LLMDP writes to `<repo>/.llmdp_facts.json` temporarily.
+- Otherwise, LLMDP writes to `<repo>/.llmdp_facts.json`.
 - LLMC consumes the facts and prints a verdict.
 - LLMDP exits with LLMC’s exit code.
+
+## Failure Semantics
+- Determinism first: check outcomes must be reproducible from command results and repository state.
+- Check command exits non-zero: emit the corresponding `*_ok` fact as `false`.
+- Optional check is not applicable: omit that fact key.
+  - Node examples: missing script (`lint`, `test`, `build`, `typecheck`) or missing `package-lock.json` for `audit_ok`.
+- Required check command cannot be executed (for example, binary missing or spawn failure): operational failure with exit code `3`.
+  - In this case, LLMDP exits before contract evaluation and does not write a facts file.
+- Node `package.json` missing, unreadable, or invalid JSON: return `{}` (no checks are run).
+- LLMC invocation failure (for example, `llmc` missing on `PATH`): operational failure with exit code `3`.
 
 ## Build
 ```sh
